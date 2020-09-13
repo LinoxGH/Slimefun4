@@ -12,7 +12,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import io.github.thebusybiscuit.cscorelib2.inventory.ItemUtils;
+import io.github.thebusybiscuit.slimefun4.core.handlers.EnhancedCraftingTableCraftHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunPlugin;
 import io.github.thebusybiscuit.slimefun4.implementation.items.backpacks.SlimefunBackpack;
 import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
@@ -20,6 +23,7 @@ import io.papermc.lib.PaperLib;
 import me.mrCookieSlime.Slimefun.Lists.RecipeType;
 import me.mrCookieSlime.Slimefun.Objects.Category;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.SlimefunItem;
+import me.mrCookieSlime.Slimefun.Objects.handlers.ItemHandler;
 import me.mrCookieSlime.Slimefun.api.Slimefun;
 import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
 
@@ -55,6 +59,7 @@ public class EnhancedCraftingTable extends BackpackCrafter {
         }
     }
 
+    @ParametersAreNonnullByDefault
     private void craft(Inventory inv, Block dispenser, Player p, Block b, ItemStack output) {
         Inventory fakeInv = createVirtualInventory(inv);
         Inventory outputInv = findOutputInventory(output, dispenser, inv, fakeInv);
@@ -78,12 +83,18 @@ public class EnhancedCraftingTable extends BackpackCrafter {
 
             outputInv.addItem(output);
 
+            for (ItemHandler handler : SlimefunItem.getPublicItemHandlers(EnhancedCraftingTableCraftHandler.class)) {
+                if (((EnhancedCraftingTableCraftHandler) handler).onCraft(dispenser, output)) {
+                    return;
+                }
+            }
         }
         else {
             SlimefunPlugin.getLocalization().sendMessage(p, "machines.full-inventory", true);
         }
     }
 
+    @ParametersAreNonnullByDefault
     private boolean isCraftable(Inventory inv, ItemStack[] recipe) {
         for (int j = 0; j < inv.getContents().length; j++) {
             if (!SlimefunUtils.isItemSimilar(inv.getContents()[j], recipe[j], true)) {
