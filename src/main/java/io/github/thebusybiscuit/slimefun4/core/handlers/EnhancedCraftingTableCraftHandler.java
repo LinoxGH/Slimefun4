@@ -34,7 +34,7 @@ public interface EnhancedCraftingTableCraftHandler extends ItemHandler {
      * @param result
      *            The {@link ItemStack} that was produced.
      */
-    void onCraft(@Nonnull Block disp, @Nonnull ItemStack result);
+    boolean onCraft(@Nonnull Block disp, @Nonnull ItemStack result);
 
     @Override
     default Class<? extends ItemHandler> getIdentifier() {
