@@ -1,6 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.magical;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -15,12 +16,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import io.github.thebusybiscuit.cscorelib2.chat.ChatColors;
 import io.github.thebusybiscuit.cscorelib2.protection.ProtectableAction;
+import io.github.thebusybiscuit.slimefun4.core.handlers.EnhancedCraftingTableCraftHandler;
 import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunPlugin;
 import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunItem;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import me.mrCookieSlime.Slimefun.Lists.RecipeType;
 import me.mrCookieSlime.Slimefun.Objects.Category;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.SlimefunItem;
@@ -38,6 +43,7 @@ import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
 public class StormStaff extends SimpleSlimefunItem<ItemUseHandler> {
 
     private static final NamespacedKey usageKey = new NamespacedKey(SlimefunPlugin.instance(), "stormstaff_usage");
+    private static final NamespacedKey randomKey = new NamespacedKey(SlimefunPlugin.instance(), "stormstaff_random");
     public static final int MAX_USES = 8;
 
     public StormStaff(Category category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
@@ -82,6 +88,7 @@ public class StormStaff extends SimpleSlimefunItem<ItemUseHandler> {
         };
     }
 
+    @ParametersAreNonnullByDefault
     private void useItem(Player p, ItemStack item, Location loc) {
         loc.getWorld().strikeLightning(loc);
 
@@ -115,6 +122,29 @@ public class StormStaff extends SimpleSlimefunItem<ItemUseHandler> {
 
             item.setItemMeta(meta);
         }
+    }
+    
+    public EnhancedCraftingTableCraftHandler onCraft() {
+        return (disp, item) -> {
+            if (SlimefunUtils.isItemSimilar(item, getItem(), true)) {
+                
+                ItemMeta meta = item.getItemMeta();
+                
+                UUID uuid = UUID.randomUUID();
+                long[] random = new long[]{uuid.getLeastSignificantBits(), uuid.getMostSignificantBits()};
+                
+                meta.getPersistentDataContainer().set(randomKey, PersistentDataType.LONG_ARRAY, random);
+                item.setItemMeta(meta);
+                return true;
+            }
+            return false;
+        };
+    }
+    
+    @Override
+    public void preRegister() {
+        super.preRegister();
+        addItemHandler(onCraft());
     }
 
 }
