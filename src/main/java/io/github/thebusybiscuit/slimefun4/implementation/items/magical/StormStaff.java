@@ -25,6 +25,7 @@ import io.github.thebusybiscuit.slimefun4.core.handlers.ItemUseHandler;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunPlugin;
 import io.github.thebusybiscuit.slimefun4.implementation.items.SimpleSlimefunItem;
+import io.github.thebusybiscuit.slimefun4.utils.SlimefunUtils;
 import me.mrCookieSlime.Slimefun.Lists.RecipeType;
 import me.mrCookieSlime.Slimefun.Objects.Category;
 import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.SlimefunItem;
@@ -129,12 +130,14 @@ public class StormStaff extends SimpleSlimefunItem<ItemUseHandler> {
                 
                 ItemMeta meta = item.getItemMeta();
                 
-                UUID uuid = UUID.randomUuid();
-                long[] random = new long[]{uuid.getLeastSignificantBytes(), uuid.getMostSignificantBytes()};
+                UUID uuid = UUID.randomUUID();
+                long[] random = new long[]{uuid.getLeastSignificantBits(), uuid.getMostSignificantBits()};
                 
                 meta.getPersistentDataContainer().set(randomKey, PersistentDataType.LONG_ARRAY, random);
                 item.setItemMeta(meta);
+                return true;
             }
+            return false;
         };
     }
     
