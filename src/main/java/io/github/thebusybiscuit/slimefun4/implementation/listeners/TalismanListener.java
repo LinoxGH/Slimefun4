@@ -171,8 +171,8 @@ public class TalismanListener implements Listener {
                 items.remove(item);
             }
             
-            System.println("Removed main hand item: " + items.remove(equipment.getItemInMainHand()));
-            System.println("Removed off hand item: " + items.remove(equipment.getItemInOffHand()));
+            System.out.println("Removed main hand item: " + items.remove(equipment.getItemInMainHand()));
+            System.out.println("Removed off hand item: " + items.remove(equipment.getItemInOffHand()));
         }
 
         return items;
