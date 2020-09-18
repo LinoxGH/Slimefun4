@@ -156,7 +156,10 @@ public class TalismanListener implements Listener {
             if (horse.isCarryingChest()) {
                 // The chest is not included in getStorageContents()
                 items.remove(new ItemStack(Material.CHEST));
-                items.removeAll(horse.getInventory().getStorageContents());
+                
+                for (ItemStack item : horse.getInventory().getStorageContents()) {
+                    items.remove(item);
+                }
             }
         }
 
@@ -164,7 +167,10 @@ public class TalismanListener implements Listener {
         EntityEquipment equipment = entity.getEquipment();
         if (equipment != null) {
         
-            items.removeAll(equipment.getArmorContents());
+            for (ItemStack item : equipment.getArmorContents()) {
+                items.remove(item);
+            }
+            
             System.println("Removed main hand item: " + items.remove(equipment.getItemInMainHand()));
             System.println("Removed off hand item: " + items.remove(equipment.getItemInOffHand()));
         }
