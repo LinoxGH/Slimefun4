@@ -2,6 +2,8 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of contents**
 
+- [Release Candidate 18 (TBD)](#release-candidate-18-tbd)
+- [Release Candidate 17 (17 Oct 2020)](#release-candidate-17-17-oct-2020)
 - [Release Candidate 16 (07 Sep 2020)](#release-candidate-16-07-sep-2020)
 - [Release Candidate 15 (01 Aug 2020)](#release-candidate-15-01-aug-2020)
 - [Release Candidate 14 (12 Jul 2020)](#release-candidate-14-12-jul-2020)
@@ -20,6 +22,139 @@
 - [Release Candidate 1 (26 Sep 2019)](#release-candidate-1-26-sep-2019)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
+## Release Candidate 18 (TBD)
+
+#### Additions
+* The Smelters Pick now also works on Ancient Debris
+* (API) Added PlayerPreResearchEvent
+* Added a config option to disable network visualizations
+* (API) Added CoolerFeedPlayerEvent
+* Added a config option to delete excess cargo network items
+* Added an item setting to configure the Wind Staff velocity
+* Added an item setting to the Infused Hopper to toggle it with redstone
+
+#### Changes
+* Removed 1.13 support
+* Cooling Units can no longer be placed down
+* Heating Coils can no longer be placed down
+* Electric Motors can no longer be placed down
+* Cargo Motors can no longer be placed down
+* Magnets can no longer be placed down
+* Electromagnets can no longer be placed down
+* Performance improvements to Cargo network visualizations
+* General performance improvements
+* Improved performance for radioactive items
+* Memory/GC improvements for the profiler
+* Performance improvements for the Fluid Pump
+* Removed EmeraldEnchants integration
+* Memory and performance improvements for ticking blocks
+
+#### Fixes
+* Fixed #2448
+* Fixed #2470
+* Fixed #2478
+* Fixed #2493
+* Fixed a missing slot in the contributors menu
+* Fixed color codes in script downloading screen
+* Fixed #2505
+* Fixed contributors not showing correctly
+* Fixed #2469
+* Fixed #2509
+* Fixed #2499
+* Fixed #2527
+* Fixed #2519
+* Fixed #2517
+* Fixed Magician Talisman sometimes drawing invalid enchantments
+* Fixed id conflicts for external Enchantment sources (e.g. plugins) for the Magician Talisman settings
+* Fixed network visualizers spawning particles for other player heads
+* Fixed #2418
+* Fixed #2446
+* Fixed CoreProtect not recognizing Slimefun blocks getting broken
+* Fixed #2447
+* Fixed #2558
+* Fixed a duplication bug with the Block Placer
+* Fixed Slimefun Guide Settings showing "last activity" as a negative number
+* Fixed Armor Stands getting damaged/pushed by Explosive Bow
+* Fixed Sword of Beheading dropping Zombie/Skeleton Skulls from Zombie/Skeleton subvariants
+* Fixed #2518
+* Fixed #2421
+* Fixed #2574
+* Fixed color in android script downloading screen
+* Fixed #2576
+* Fixed #2496
+
+## Release Candidate 17 (17 Oct 2020)
+
+#### Additions
+* Added /sf charge
+* Added Energized Energy Capacitor
+* Added various new fuel types to the Coal Generator
+* Added a config option for Grappling Hooks to not be consumed on use
+* Added Talisman of the Caveman
+* You can now convert any gold ingot into gold dust with slightly less returns
+* Magical Zombie Pills now also work on Zombified Piglins
+* (API) Added SlimefunGuideOpenEvent
+* (API) Added "NotConfigurable" attribute to disable configurability
+* Added Elytra Cap
+* Added Planks to Sticks recipe to the Table Saw
+* Added "slimefun.gps.bypass" permission to open GPS devices anywhere
+* (API) Added custom tags for developers
+* The range of the Seeker Pickaxe is now configurable
+* Added Energy Connector
+* Blackstone can now be turned into lava using a Crucible
+* Basalt can now be turned into lava using a Crucible
+* Added "Tainted Sheep" (You can dye a Sheep using Strange Nether Goo)
+* Added mcMMO support/integration
+
+#### Changes
+* Improved Auto-Updater (Multi-Threading and more)
+* General performance improvements
+* /sf cheat now shows seasonal categories all year through
+* GPS devices now require chest-access in that area to be used
+
+#### Fixes
+* Fixed #2300
+* Fixed #2296
+* Fixed colors of Cheat Sheet Slimefun Guide
+* Fixed Cheat Sheet Slimefun Guide being unable to open the settings menu via shift + right click
+* Fixed #2320
+* Fixed some issues with ChestTerminal
+* Fixed #2325
+* Fixed Climbing Pick having no animation in creative mode
+* Fixed #2322
+* Fixed some cargo incompatibilities with overflowing inventories
+* Fixed #2353
+* Fixed #2359
+* Fixed #2356
+* Fixed #2358
+* Fixed #2360
+* Fixed #2351
+* Fixed #2357
+* Fixed Auto Enchanters being unaffected by speed modifications from addons
+* Fixed Auto Disenchanters being unaffected by speed modifications from addons
+* Fixed radioactive items still being radioactive when disabled
+* Fixed #2391
+* Fixed #2403
+* Fixed #2405
+* Fixed #2412
+* Fixed #2238
+* Fixed #2439
+* Fixed #2420
+* Fixed #2422
+* Fixed #2433
+* Fixed #2455
+* Fixed #2450
+* Fixed Steel Thrusters being used to milk cows
+* Fixed #2424
+* Fixed #2468
+* Fixed #2414
+* Fixed #2454
+* Fixed #2457
+* Fixed #2411
+* Fixed #2423
+* Fixed #2452
+* Fixed a dupe bug with mcMMO
 
 ## Release Candidate 16 (07 Sep 2020)
 https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#16
@@ -107,6 +242,7 @@ https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#16
 * Fixed #2266
 * Fixed #2275
 * Fixed Multi Tools consuming hunger points when holding a Wind Staff in your off hand
+* Fixed Teleports getting stuck sometimes
 
 ## Release Candidate 15 (01 Aug 2020)
 https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#15
@@ -224,7 +360,7 @@ https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#14
 * Fixed a rare concurrency issue with world saving
 * Fixed some contributors showing up twice
 * Fixed #2062
-* Fixed Grappling hooks disappearing when fired at Item frames or paintaings
+* Fixed Grappling hooks disappearing when fired at Item frames or paintings
 * Fixed Grappling hooks not getting removed when the Player leaves
 * Fixed Grappling hooks making Bat sounds
 * Fixed #1959
@@ -270,7 +406,7 @@ https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#13
 * Auto Disenchanting is now a tiny bit faster
 * Small performance improvements
 * Dried Kelp Blocks can now be used as fuel for Tier 1 Androids
-* Androids now have a seperate category in the Slimefun Guide
+* Androids now have a separate category in the Slimefun Guide
 * Android Interface recipes now require steel ingots
 * Changed and unified a couple of tooltips
 * Changed tooltip on jetpacks and jet boots to say "Crouch" instead of "Hold Shift"
@@ -317,7 +453,7 @@ https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#12
 * Fixed #1834
 * Fixed #1843
 * Fixed #1873
-* Fixed Electric Smeltery not prioritisting recipes
+* Fixed Electric Smeltery not prioritising recipes
 * Fixed #1851
 * Fixed #1891
 * Fixed #1893
@@ -417,7 +553,7 @@ https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#10
 * Internal clean up and further documentation
 * Changed Automatic Ignition Chamber to be a Dropper
 * Teleporters are now significantly faster
-* Item permissions have been moved to a seperate permissions.yml file
+* Item permissions have been moved to a separate permissions.yml file
 * Salt now only requires 2 blocks of Sand
 * Fireworks from researching no longer damages entities
 * Very slight performance improvements for Cargo networks
@@ -502,7 +638,7 @@ https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#6
 https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#5
 
 #### Additions
-* Aded preset messages.yml files
+* Added preset messages.yml files
 * Added user-configurable localization
 * Added many more options to the messages.yml
 * Added custom model data support for Languages
@@ -515,8 +651,8 @@ https://thebusybiscuit.github.io/builds/TheBusyBiscuit/Slimefun4/stable/#5
 * Added ability to translate messages for Players
 * Added the ability to translate Researches
 * Added StatusEffect API
-* Added translatibility to categories
-* Added translatibility to geo-resources
+* Added translatability to categories
+* Added translatability to geo-resources
 
 #### Changes
 * Removed Solar Array

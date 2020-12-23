@@ -31,14 +31,14 @@ import me.mrCookieSlime.Slimefun.Lists.RecipeType;
  * This is an abstract parent class of {@link LocalizationService}.
  * There is not really much more I can say besides that...
  * 
- * @author TheBusyBiscui
+ * @author TheBusyBiscuit
  * 
  * @see LocalizationService
  *
  */
 public abstract class SlimefunLocalization extends Localization implements Keyed {
 
-    public SlimefunLocalization(@Nonnull SlimefunPlugin plugin) {
+    protected SlimefunLocalization(@Nonnull SlimefunPlugin plugin) {
         super(plugin);
     }
 
@@ -71,6 +71,15 @@ public abstract class SlimefunLocalization extends Localization implements Keyed
      */
     public abstract Language getDefaultLanguage();
 
+    /**
+     * This returns whether a {@link Language} with the given id exists within
+     * the project resources.
+     * 
+     * @param id
+     *            The {@link Language} id
+     * 
+     * @return Whether the project contains a {@link Language} with that id
+     */
     protected abstract boolean hasLanguage(@Nonnull String id);
 
     /**
@@ -82,8 +91,21 @@ public abstract class SlimefunLocalization extends Localization implements Keyed
     @Nonnull
     public abstract Collection<Language> getLanguages();
 
+    /**
+     * This method adds a new {@link Language} with the given id and texture.
+     * 
+     * @param id
+     *            The {@link Language} id
+     * @param texture
+     *            The texture of how this {@link Language} should be displayed
+     */
     protected abstract void addLanguage(@Nonnull String id, @Nonnull String texture);
 
+    /**
+     * This will load every {@link SupportedLanguage} into memory.
+     * To be precise: It performs {@link #addLanguage(String, String)} for every
+     * value of {@link SupportedLanguage}.
+     */
     protected void loadEmbeddedLanguages() {
         for (SupportedLanguage lang : SupportedLanguage.values()) {
             if (lang.isReadyForRelease() || SlimefunPlugin.getUpdater().getBranch() != SlimefunBranch.STABLE) {
@@ -160,8 +182,7 @@ public abstract class SlimefunLocalization extends Localization implements Keyed
 
         if (value != null) {
             return value;
-        }
-        else {
+        } else {
             Language fallback = getLanguage(SupportedLanguage.ENGLISH.getLanguageId());
             return fallback.getResourcesFile().getString(key);
         }
@@ -199,8 +220,7 @@ public abstract class SlimefunLocalization extends Localization implements Keyed
 
         if (sender instanceof Player) {
             sender.sendMessage(ChatColors.color(prefix + getMessage((Player) sender, key)));
-        }
-        else {
+        } else {
             sender.sendMessage(ChatColor.stripColor(ChatColors.color(prefix + getMessage(key))));
         }
     }
@@ -224,8 +244,7 @@ public abstract class SlimefunLocalization extends Localization implements Keyed
 
         if (sender instanceof Player) {
             sender.sendMessage(ChatColors.color(prefix + function.apply(getMessage((Player) sender, key))));
-        }
-        else {
+        } else {
             sender.sendMessage(ChatColor.stripColor(ChatColors.color(prefix + function.apply(getMessage(key)))));
         }
     }
@@ -239,8 +258,7 @@ public abstract class SlimefunLocalization extends Localization implements Keyed
                 String message = ChatColors.color(prefix + translation);
                 sender.sendMessage(message);
             }
-        }
-        else {
+        } else {
             for (String translation : getMessages(key)) {
                 String message = ChatColors.color(prefix + translation);
                 sender.sendMessage(ChatColor.stripColor(message));
@@ -257,8 +275,7 @@ public abstract class SlimefunLocalization extends Localization implements Keyed
                 String message = ChatColors.color(prefix + function.apply(translation));
                 sender.sendMessage(message);
             }
-        }
-        else {
+        } else {
             for (String translation : getMessages(key)) {
                 String message = ChatColors.color(prefix + function.apply(translation));
                 sender.sendMessage(ChatColor.stripColor(message));

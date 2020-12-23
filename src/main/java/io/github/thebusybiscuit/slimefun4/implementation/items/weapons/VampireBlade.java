@@ -1,5 +1,8 @@
 package io.github.thebusybiscuit.slimefun4.implementation.items.weapons;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import org.bukkit.Sound;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
@@ -7,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import io.github.thebusybiscuit.slimefun4.api.items.ItemSetting;
+import io.github.thebusybiscuit.slimefun4.api.items.settings.IntRangeSetting;
 import io.github.thebusybiscuit.slimefun4.implementation.listeners.VampireBladeListener;
 import me.mrCookieSlime.Slimefun.Lists.RecipeType;
 import me.mrCookieSlime.Slimefun.Objects.Category;
@@ -25,8 +29,9 @@ import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
 public class VampireBlade extends SlimefunItem {
 
     private static final double HEALING_AMOUNT = 4.0;
-    private final ItemSetting<Integer> chance = new ItemSetting<>("chance", 45);
+    private final ItemSetting<Integer> chance = new IntRangeSetting("chance", 0, 45, 100);
 
+    @ParametersAreNonnullByDefault
     public VampireBlade(Category category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe) {
         super(category, item, recipeType, recipe);
 
@@ -42,7 +47,7 @@ public class VampireBlade extends SlimefunItem {
         return chance.getValue();
     }
 
-    public void heal(Player p) {
+    public void heal(@Nonnull Player p) {
         p.playSound(p.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 0.7F, 0.7F);
         double health = p.getHealth() + HEALING_AMOUNT;
         double maxHealth = p.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue();

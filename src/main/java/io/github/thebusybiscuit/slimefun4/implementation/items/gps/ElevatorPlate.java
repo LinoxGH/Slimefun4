@@ -34,35 +34,47 @@ import me.mrCookieSlime.CSCoreLibPlugin.general.Inventory.ChestMenu;
 import me.mrCookieSlime.Slimefun.Lists.RecipeType;
 import me.mrCookieSlime.Slimefun.Objects.Category;
 import me.mrCookieSlime.Slimefun.api.BlockStorage;
-import me.mrCookieSlime.Slimefun.api.Slimefun;
 import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
 
+/**
+ * The {@link ElevatorPlate} is a quick way of teleportation.
+ * You can place multiple {@link ElevatorPlate ElevatorPlates} along the y axis
+ * to teleport between them.
+ * 
+ * @author TheBusyBiscuit
+ *
+ */
 public class ElevatorPlate extends SimpleSlimefunItem<BlockUseHandler> {
 
+    /**
+     * This is our key for storing the floor name.
+     */
     private static final String DATA_KEY = "floor";
+
+    /**
+     * This is our {@link Set} of currently teleporting {@link Player Players}.
+     * It is used to prevent them from triggering the {@link ElevatorPlate} they land on.
+     */
     private final Set<UUID> users = new HashSet<>();
 
+    @ParametersAreNonnullByDefault
     public ElevatorPlate(Category category, SlimefunItemStack item, RecipeType recipeType, ItemStack[] recipe, ItemStack recipeOutput) {
         super(category, item, recipeType, recipe, recipeOutput);
 
         addItemHandler(onPlace());
     }
 
+    @Nonnull
     private BlockPlaceHandler onPlace() {
         return new BlockPlaceHandler(false) {
 
             @Override
             public void onPlayerPlace(BlockPlaceEvent e) {
                 Block b = e.getBlock();
-                BlockStorage.addBlockInfo(b, DATA_KEY, "&rFloor #0");
+                BlockStorage.addBlockInfo(b, DATA_KEY, ChatColor.WHITE + "Floor #0");
                 BlockStorage.addBlockInfo(b, "owner", e.getPlayer().getUniqueId().toString());
             }
         };
-    }
-
-    @Nonnull
-    public Set<UUID> getUsers() {
-        return users;
     }
 
     @Override
@@ -88,7 +100,7 @@ public class ElevatorPlate extends SimpleSlimefunItem<BlockUseHandler> {
 
             Block block = b.getWorld().getBlockAt(b.getX(), y, b.getZ());
 
-            if (block.getType() == getItem().getType() && BlockStorage.check(block, getID())) {
+            if (block.getType() == getItem().getType() && BlockStorage.check(block, getId())) {
                 floors.add(block);
             }
         }
@@ -106,8 +118,7 @@ public class ElevatorPlate extends SimpleSlimefunItem<BlockUseHandler> {
 
         if (floors.size() < 2) {
             SlimefunPlugin.getLocalization().sendMessage(p, "machines.ELEVATOR.no-destinations", true);
-        }
-        else {
+        } else {
             openFloorSelector(b, floors, p);
         }
     }
@@ -133,8 +144,7 @@ public class ElevatorPlate extends SimpleSlimefunItem<BlockUseHandler> {
             if (block.getY() == b.getY()) {
                 line = new ChatComponent("\n" + ChatColor.GRAY + "> " + (floors.size() - i) + ". " + ChatColor.BLACK + floor);
                 line.setHoverEvent(new HoverEvent(ChatColors.color(SlimefunPlugin.getLocalization().getMessage(p, "machines.ELEVATOR.current-floor")), "", ChatColor.WHITE + floor, ""));
-            }
-            else {
+            } else {
                 line = new ChatComponent("\n" + ChatColor.GRAY + (floors.size() - i) + ". " + ChatColor.BLACK + floor);
                 line.setHoverEvent(new HoverEvent(ChatColors.color(SlimefunPlugin.getLocalization().getMessage(p, "machines.ELEVATOR.click-to-teleport")), "", ChatColor.WHITE + floor, ""));
                 line.setClickEvent(new ClickEvent(new NamespacedKey(SlimefunPlugin.instance(), DATA_KEY + i), player -> teleport(player, floor, block)));
@@ -152,7 +162,7 @@ public class ElevatorPlate extends SimpleSlimefunItem<BlockUseHandler> {
 
     @ParametersAreNonnullByDefault
     private void teleport(Player player, String floorName, Block target) {
-        Slimefun.runSync(() -> {
+        SlimefunPlugin.runSync(() -> {
             users.add(player.getUniqueId());
 
             float yaw = player.getEyeLocation().getYaw() + 180;
@@ -175,7 +185,7 @@ public class ElevatorPlate extends SimpleSlimefunItem<BlockUseHandler> {
     public void openEditor(Player p, Block b) {
         ChestMenu menu = new ChestMenu("Elevator Settings");
 
-        menu.addItem(4, new CustomItem(Material.NAME_TAG, "&7Floor Name &e(Click to edit)", "", "&r" + ChatColors.color(BlockStorage.getLocationInfo(b.getLocation(), DATA_KEY))));
+        menu.addItem(4, new CustomItem(Material.NAME_TAG, "&7Floor Name &e(Click to edit)", "", ChatColor.WHITE + ChatColors.color(BlockStorage.getLocationInfo(b.getLocation(), DATA_KEY))));
         menu.addMenuClickHandler(4, (pl, slot, item, action) -> {
             pl.closeInventory();
             pl.sendMessage("");

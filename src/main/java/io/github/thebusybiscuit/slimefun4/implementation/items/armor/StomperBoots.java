@@ -52,7 +52,7 @@ public class StomperBoots extends SlimefunItem {
                 n.setVelocity(velocity);
 
                 // Check if it's not a Player or if PvP is enabled
-                if (!(n instanceof Player) || (p.getWorld().getPVP() && SlimefunPlugin.getProtectionManager().hasPermission(p, n.getLocation(), ProtectableAction.PVP))) {
+                if (!(n instanceof Player) || (p.getWorld().getPVP() && SlimefunPlugin.getProtectionManager().hasPermission(p, n.getLocation(), ProtectableAction.ATTACK_PLAYER))) {
                     EntityDamageByEntityEvent event = new EntityDamageByEntityEvent(p, n, DamageCause.ENTITY_ATTACK, fallDamageEvent.getDamage() / 2);
                     Bukkit.getPluginManager().callEvent(event);
 
@@ -83,8 +83,7 @@ public class StomperBoots extends SlimefunItem {
         // As the distance approaches zero we might slip into a "division by zero" when normalizing
         if (origin.distanceSquared(target) < 0.05) {
             return new Vector(0, 1, 0);
-        }
-        else {
+        } else {
             Vector direction = target.toVector().subtract(origin.toVector());
             return direction.normalize().multiply(1.4);
         }

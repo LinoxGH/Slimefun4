@@ -8,6 +8,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.logging.Level;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -24,7 +27,6 @@ import io.github.thebusybiscuit.cscorelib2.chat.ChatInput;
 import io.github.thebusybiscuit.cscorelib2.inventory.ItemUtils;
 import io.github.thebusybiscuit.cscorelib2.item.CustomItem;
 import io.github.thebusybiscuit.cscorelib2.recipes.MinecraftRecipe;
-import io.github.thebusybiscuit.slimefun4.api.MinecraftVersion;
 import io.github.thebusybiscuit.slimefun4.api.player.PlayerProfile;
 import io.github.thebusybiscuit.slimefun4.core.attributes.RecipeDisplayItem;
 import io.github.thebusybiscuit.slimefun4.core.categories.FlexCategory;
@@ -63,22 +65,15 @@ import me.mrCookieSlime.Slimefun.api.Slimefun;
 public class ChestSlimefunGuide implements SlimefunGuideImplementation {
 
     private static final int CATEGORY_SIZE = 36;
+    private static final Sound sound = Sound.ITEM_BOOK_PAGE_TURN;
 
-    private final ItemStack item;
     private final int[] recipeSlots = { 3, 4, 5, 12, 13, 14, 21, 22, 23 };
-    private final Sound sound;
+    private final ItemStack item;
     private final boolean showVanillaRecipes;
 
-    public ChestSlimefunGuide(boolean vanillaRecipes) {
-        showVanillaRecipes = vanillaRecipes;
+    public ChestSlimefunGuide(boolean showVanillaRecipes) {
+        this.showVanillaRecipes = showVanillaRecipes;
         item = new SlimefunGuideItem(this, "&aSlimefun Guide &7(Chest GUI)");
-
-        if (SlimefunPlugin.getMinecraftVersion().isAtLeast(MinecraftVersion.MINECRAFT_1_14)) {
-            sound = Sound.ITEM_BOOK_PAGE_TURN;
-        }
-        else {
-            sound = Sound.ENTITY_BAT_TAKEOFF;
-        }
     }
 
     @Override
@@ -96,7 +91,17 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
         return true;
     }
 
-    private List<Category> getVisibleCategories(Player p, PlayerProfile profile) {
+    /**
+     * Returns a {@link List} of visible {@link Category} instances that the {@link SlimefunGuide} would display.
+     *
+     * @param p
+     *            The {@link Player} who opened his {@link SlimefunGuide}
+     * @param profile
+     *            The {@link PlayerProfile} of the {@link Player}
+     * @return a {@link List} of visible {@link Category} instances
+     */
+    @Nonnull
+    protected List<Category> getVisibleCategories(@Nonnull Player p, @Nonnull PlayerProfile profile) {
         List<Category> categories = new LinkedList<>();
 
         for (Category category : SlimefunPlugin.getRegistry().getCategories()) {
@@ -121,7 +126,6 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
         }
 
         ChestMenu menu = create(p);
-
         List<Category> categories = getVisibleCategories(p, profile);
 
         int index = 9;
@@ -172,8 +176,7 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
                 openCategory(profile, category, 1);
                 return false;
             });
-        }
-        else {
+        } else {
             List<String> lore = new ArrayList<>();
             lore.add("");
 
@@ -223,14 +226,22 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
         menu.addItem(46, ChestMenuUtils.getPreviousButton(p, page, pages));
         menu.addMenuClickHandler(46, (pl, slot, item, action) -> {
             int next = page - 1;
-            if (next != page && next > 0) openCategory(profile, category, next);
+
+            if (next != page && next > 0) {
+                openCategory(profile, category, next);
+            }
+
             return false;
         });
 
         menu.addItem(52, ChestMenuUtils.getNextButton(p, page, pages));
         menu.addMenuClickHandler(52, (pl, slot, item, action) -> {
             int next = page + 1;
-            if (next != page && next <= pages) openCategory(profile, category, next);
+
+            if (next != page && next <= pages) {
+                openCategory(profile, category, next);
+            }
+
             return false;
         });
 
@@ -260,46 +271,28 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
 
         if (isSurvivalMode() && !Slimefun.hasPermission(p, sfitem, false)) {
             List<String> message = SlimefunPlugin.getPermissionsService().getLore(sfitem);
-            menu.addItem(index, new CustomItem(Material.BARRIER, sfitem.getItemName(), message.toArray(new String[0])));
+            menu.addItem(index, new CustomItem(ChestMenuUtils.getNoPermissionItem(), sfitem.getItemName(), message.toArray(new String[0])));
             menu.addMenuClickHandler(index, ChestMenuUtils.getEmptyClickHandler());
-        }
-        else if (isSurvivalMode() && research != null && !profile.hasUnlocked(research)) {
-            menu.addItem(index, new CustomItem(Material.BARRIER, ChatColor.WHITE + ItemUtils.getItemName(sfitem.getItem()), "&4&l" + SlimefunPlugin.getLocalization().getMessage(p, "guide.locked"), "", "&a> Click to unlock", "", "&7Cost: &b" + research.getCost() + " Level(s)"));
+        } else if (isSurvivalMode() && research != null && !profile.hasUnlocked(research)) {
+            menu.addItem(index, new CustomItem(ChestMenuUtils.getNotResearchedItem(), ChatColor.WHITE + ItemUtils.getItemName(sfitem.getItem()), "&4&l" + SlimefunPlugin.getLocalization().getMessage(p, "guide.locked"), "", "&a> Click to unlock", "", "&7Cost: &b" + research.getCost() + " Level(s)"));
             menu.addMenuClickHandler(index, (pl, slot, item, action) -> {
-                if (!SlimefunPlugin.getRegistry().getCurrentlyResearchingPlayers().contains(pl.getUniqueId())) {
-                    if (research.canUnlock(pl)) {
-                        if (profile.hasUnlocked(research)) {
-                            openCategory(profile, category, page);
-                        }
-                        else {
-                            unlockItem(pl, sfitem, player -> openCategory(profile, category, page));
-                        }
-                    }
-                    else {
-                        SlimefunPlugin.getLocalization().sendMessage(pl, "messages.not-enough-xp", true);
-                    }
-                }
-
+                research.unlockFromGuide(this, p, profile, sfitem, category, page);
                 return false;
             });
-        }
-        else {
+        } else {
             menu.addItem(index, sfitem.getItem());
             menu.addMenuClickHandler(index, (pl, slot, item, action) -> {
                 try {
                     if (isSurvivalMode()) {
                         displayItem(profile, sfitem, true);
-                    }
-                    else {
+                    } else {
                         if (sfitem instanceof MultiBlockMachine) {
                             SlimefunPlugin.getLocalization().sendMessage(pl, "guide.cheat.no-multiblocks");
-                        }
-                        else {
+                        } else {
                             pl.getInventory().addItem(sfitem.getItem().clone());
                         }
                     }
-                }
-                catch (Exception | LinkageError x) {
+                } catch (Exception | LinkageError x) {
                     printErrorMessage(pl, x);
                 }
 
@@ -330,26 +323,14 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
         int index = 9;
         // Find items and add them
         for (SlimefunItem slimefunItem : SlimefunPlugin.getRegistry().getEnabledSlimefunItems()) {
-            String itemName = ChatColor.stripColor(slimefunItem.getItemName()).toLowerCase(Locale.ROOT);
-
             if (index == 44) {
                 break;
             }
 
-            if (!itemName.isEmpty() && (itemName.equals(searchTerm) || itemName.contains(searchTerm))) {
+            if (isSearchFilterApplicable(slimefunItem, searchTerm)) {
                 ItemStack itemstack = new CustomItem(slimefunItem.getItem(), meta -> {
-                    List<String> lore = null;
                     Category category = slimefunItem.getCategory();
-
-                    if (category != null) {
-                        ItemStack categoryItem = category.getItem(p);
-
-                        if (categoryItem != null && categoryItem.hasItemMeta() && categoryItem.getItemMeta().hasDisplayName()) {
-                            lore = Arrays.asList("", ChatColor.DARK_GRAY + "\u21E8 " + ChatColor.WHITE + categoryItem.getItemMeta().getDisplayName());
-                        }
-                    }
-
-                    meta.setLore(lore);
+                    meta.setLore(Arrays.asList("", ChatColor.DARK_GRAY + "\u21E8 " + ChatColor.WHITE + category.getDisplayName(p)));
                     meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_POTION_EFFECTS);
                 });
 
@@ -358,12 +339,10 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
                     try {
                         if (!isSurvivalMode()) {
                             pl.getInventory().addItem(slimefunItem.getItem().clone());
-                        }
-                        else {
+                        } else {
                             displayItem(profile, slimefunItem, true);
                         }
-                    }
-                    catch (Exception | LinkageError x) {
+                    } catch (Exception | LinkageError x) {
                         printErrorMessage(pl, x);
                     }
 
@@ -375,6 +354,12 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
         }
 
         menu.open(p);
+    }
+
+    @ParametersAreNonnullByDefault
+    private boolean isSearchFilterApplicable(SlimefunItem slimefunItem, String searchTerm) {
+        String itemName = ChatColor.stripColor(slimefunItem.getItemName()).toLowerCase(Locale.ROOT);
+        return !itemName.isEmpty() && (itemName.equals(searchTerm) || itemName.contains(searchTerm));
     }
 
     @Override
@@ -420,8 +405,7 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
 
             recipeType = new RecipeType(optional.get());
             result = recipe.getResult();
-        }
-        else {
+        } else {
             recipeItems = new ItemStack[] { null, null, null, null, new CustomItem(Material.BARRIER, "&4We are somehow unable to show you this Recipe :/"), null, null, null, null };
         }
 
@@ -469,8 +453,7 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
             if (((MaterialChoice) choices[0]).getChoices().size() > 1) {
                 task.add(recipeSlots[4], (MaterialChoice) choices[0]);
             }
-        }
-        else {
+        } else {
             for (int i = 0; i < choices.length; i++) {
                 if (choices[i] instanceof MaterialChoice) {
                     recipeItems[i] = new ItemStack(((MaterialChoice) choices[i]).getChoices().get(0));
@@ -534,8 +517,7 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
                 if (itemstack != null && itemstack.getType() != Material.BARRIER) {
                     displayItem(profile, itemstack, 0, true);
                 }
-            }
-            catch (Exception | LinkageError x) {
+            } catch (Exception | LinkageError x) {
                 printErrorMessage(pl, x);
             }
             return false;
@@ -598,15 +580,13 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
             menu.addMenuClickHandler(slot, (pl, s, is, action) -> {
                 if (action.isShiftClicked()) {
                     openMainMenu(profile, 1);
-                }
-                else {
+                } else {
                     history.goBack(this);
                 }
                 return false;
             });
 
-        }
-        else {
+        } else {
             menu.addItem(slot, new CustomItem(ChestMenuUtils.getBackButton(p, "", ChatColor.GRAY + SlimefunPlugin.getLocalization().getMessage(p, "guide.back.guide"))));
             menu.addMenuClickHandler(slot, (pl, s, is, action) -> {
                 openMainMenu(profile, 1);
@@ -625,8 +605,7 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
 
             String lore = Slimefun.hasPermission(p, slimefunItem, false) ? "&fNeeds to be unlocked elsewhere" : "&fNo Permission";
             return Slimefun.hasUnlocked(p, slimefunItem, false) ? item : new CustomItem(Material.BARRIER, ItemUtils.getItemName(item), "&4&l" + SlimefunPlugin.getLocalization().getMessage(p, "guide.locked"), "", lore);
-        }
-        else {
+        } else {
             return item;
         }
     }
@@ -675,8 +654,7 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
                 if (i % 2 == 0) {
                     slot = inputs;
                     inputs++;
-                }
-                else {
+                } else {
                     slot = outputs;
                     outputs++;
                 }
@@ -704,8 +682,7 @@ public class ChestSlimefunGuide implements SlimefunGuideImplementation {
                     return false;
                 });
             }
-        }
-        else {
+        } else {
             menu.replaceExistingItem(slot, null);
             menu.addMenuClickHandler(slot, ChestMenuUtils.getEmptyClickHandler());
         }

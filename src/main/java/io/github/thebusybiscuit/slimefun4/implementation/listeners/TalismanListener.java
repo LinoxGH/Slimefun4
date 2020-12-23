@@ -3,8 +3,8 @@ package io.github.thebusybiscuit.slimefun4.implementation.listeners;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Nonnull;
@@ -24,6 +24,7 @@ import org.bukkit.entity.Trident;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -44,8 +45,8 @@ import io.github.thebusybiscuit.slimefun4.implementation.SlimefunItems;
 import io.github.thebusybiscuit.slimefun4.implementation.SlimefunPlugin;
 import io.github.thebusybiscuit.slimefun4.implementation.items.magical.talismans.MagicianTalisman;
 import io.github.thebusybiscuit.slimefun4.implementation.items.magical.talismans.Talisman;
-import io.github.thebusybiscuit.slimefun4.implementation.items.magical.talismans.TalismanEnchantment;
-import me.mrCookieSlime.Slimefun.api.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.settings.TalismanEnchantment;
+import io.github.thebusybiscuit.slimefun4.utils.tags.SlimefunTag;
 
 public class TalismanListener implements Listener {
 
@@ -133,11 +134,19 @@ public class TalismanListener implements Listener {
 
         LivingEntity entity = e.getEntity();
 
-        if (!(entity instanceof Player) && !(entity instanceof ArmorStand) && Talisman.checkFor(e, SlimefunItems.TALISMAN_HUNTER)) {
+        if (entity instanceof Player || entity instanceof ArmorStand) {
+            // We absolutely don't want to double the
+            // drops from players or ArmorStands
+            return;
+        }
+
+        // We are also excluding entities which can pickup items, this is not perfect
+        // but it at least prevents dupes by tossing items to zombies
+        if (!entity.getCanPickupItems() && Talisman.checkFor(e, SlimefunItems.TALISMAN_HUNTER)) {
             Collection<ItemStack> extraDrops = getExtraDrops(e.getEntity(), e.getDrops());
 
             for (ItemStack drop : extraDrops) {
-                if (drop != null) {
+                if (drop != null && drop.getType() != Material.AIR) {
                     e.getDrops().add(drop.clone());
                 }
             }
@@ -163,7 +172,10 @@ public class TalismanListener implements Listener {
             }
         }
 
-        // Prevent duplication of handheld items or armor
+        // WARNING: This check is broken as entities now set their
+        // equipment to NULL before calling the event!
+
+        // Prevents duplication of handheld items or armor
         EntityEquipment equipment = entity.getEquipment();
         if (equipment != null) {
             for (ItemStack item : equipment.getArmorContents()) {
@@ -205,7 +217,7 @@ public class TalismanListener implements Listener {
             int itemSlot = slot;
 
             // Update the item forcefully
-            Slimefun.runSync(() -> inv.setItem(itemSlot, item), 1L);
+            SlimefunPlugin.runSync(() -> inv.setItem(itemSlot, item), 1L);
         }
     }
 
@@ -219,26 +231,28 @@ public class TalismanListener implements Listener {
     @EventHandler
     public void onEnchant(EnchantItemEvent e) {
         Random random = ThreadLocalRandom.current();
+        Map<Enchantment, Integer> enchantments = e.getEnchantsToAdd();
 
+        // Magician Talisman
         if (Talisman.checkFor(e, SlimefunItems.TALISMAN_MAGICIAN)) {
             MagicianTalisman talisman = (MagicianTalisman) SlimefunItems.TALISMAN_MAGICIAN.getItem();
-            TalismanEnchantment enchantment = talisman.getRandomEnchantment(e.getItem());
+            TalismanEnchantment enchantment = talisman.getRandomEnchantment(e.getItem(), enchantments.keySet());
 
             if (enchantment != null) {
-                e.getEnchantsToAdd().put(enchantment.getEnchantment(), enchantment.getLevel());
+                enchantments.put(enchantment.getEnchantment(), enchantment.getLevel());
             }
         }
 
-        if (!e.getEnchantsToAdd().containsKey(Enchantment.SILK_TOUCH) && Enchantment.LOOT_BONUS_BLOCKS.canEnchantItem(e.getItem()) && Talisman.checkFor(e, SlimefunItems.TALISMAN_WIZARD)) {
-            Set<Enchantment> enchantments = e.getEnchantsToAdd().keySet();
+        // Wizard Talisman
+        if (!enchantments.containsKey(Enchantment.SILK_TOUCH) && Enchantment.LOOT_BONUS_BLOCKS.canEnchantItem(e.getItem()) && Talisman.checkFor(e, SlimefunItems.TALISMAN_WIZARD)) {
 
-            for (Enchantment enchantment : enchantments) {
+            for (Enchantment enchantment : enchantments.keySet()) {
                 if (random.nextInt(100) < 40) {
                     e.getEnchantsToAdd().put(enchantment, random.nextInt(3) + 1);
                 }
             }
 
-            e.getEnchantsToAdd().put(Enchantment.LOOT_BONUS_BLOCKS, random.nextInt(3) + 3);
+            enchantments.put(Enchantment.LOOT_BONUS_BLOCKS, random.nextInt(3) + 3);
         }
     }
 
@@ -274,6 +288,13 @@ public class TalismanListener implements Listener {
         }
     }
 
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent e) {
+        if (SlimefunTag.CAVEMAN_TALISMAN_TRIGGERS.isTagged(e.getBlock().getType())) {
+            Talisman.checkFor(e, SlimefunItems.TALISMAN_CAVEMAN);
+        }
+    }
+
     private int getAmountWithFortune(@Nonnull Material type, int fortuneLevel) {
         if (fortuneLevel > 0) {
             Random random = ThreadLocalRandom.current();
@@ -281,8 +302,7 @@ public class TalismanListener implements Listener {
             amount = Math.max(amount, 1);
             amount = (type == Material.LAPIS_ORE ? 4 + random.nextInt(5) : 1) * (amount + 1);
             return amount;
-        }
-        else {
+        } else {
             return 1;
         }
     }

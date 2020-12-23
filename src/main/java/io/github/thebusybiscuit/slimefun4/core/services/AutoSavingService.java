@@ -46,7 +46,7 @@ public class AutoSavingService {
 
     /**
      * This method saves every {@link PlayerProfile} in memory and removes profiles
-     * that were markes for deletion.
+     * that were marked for deletion.
      */
     private void saveAllPlayers() {
         Iterator<PlayerProfile> iterator = PlayerProfile.iterator();
@@ -77,8 +77,9 @@ public class AutoSavingService {
         Set<BlockStorage> worlds = new HashSet<>();
 
         for (World world : Bukkit.getWorlds()) {
-            if (BlockStorage.isWorldRegistered(world.getName())) {
-                BlockStorage storage = BlockStorage.getStorage(world);
+            BlockStorage storage = BlockStorage.getStorage(world);
+
+            if (storage != null) {
                 storage.computeChanges();
 
                 if (storage.getChanges() > 0) {

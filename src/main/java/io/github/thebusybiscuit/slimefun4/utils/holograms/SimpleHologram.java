@@ -1,5 +1,7 @@
 package io.github.thebusybiscuit.slimefun4.utils.holograms;
 
+import java.util.Collection;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -10,7 +12,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 
 import io.github.thebusybiscuit.cscorelib2.chat.ChatColors;
-import me.mrCookieSlime.Slimefun.api.Slimefun;
+import io.github.thebusybiscuit.slimefun4.implementation.SlimefunPlugin;
 
 /**
  * This utility class provides a few static methods for modifying a simple Text-based Hologram.
@@ -23,14 +25,14 @@ public final class SimpleHologram {
     private SimpleHologram() {}
 
     public static void update(@Nonnull Block b, @Nonnull String name) {
-        Slimefun.runSync(() -> {
+        SlimefunPlugin.runSync(() -> {
             ArmorStand hologram = getArmorStand(b, true);
             hologram.setCustomName(ChatColors.color(name));
         });
     }
 
     public static void remove(@Nonnull Block b) {
-        Slimefun.runSync(() -> {
+        SlimefunPlugin.runSync(() -> {
             ArmorStand hologram = getArmorStand(b, false);
 
             if (hologram != null) {
@@ -42,23 +44,29 @@ public final class SimpleHologram {
     @Nullable
     private static ArmorStand getArmorStand(@Nonnull Block b, boolean createIfNoneExists) {
         Location l = new Location(b.getWorld(), b.getX() + 0.5, b.getY() + 0.7F, b.getZ() + 0.5);
+        Collection<Entity> holograms = b.getWorld().getNearbyEntities(l, 0.2, 0.2, 0.2, SimpleHologram::isPossibleHologram);
 
-        for (Entity n : l.getChunk().getEntities()) {
-            if (n instanceof ArmorStand && l.distanceSquared(n.getLocation()) < 0.4D && isPossibleHologram((ArmorStand) n)) {
+        for (Entity n : holograms) {
+            if (n instanceof ArmorStand) {
                 return (ArmorStand) n;
             }
         }
 
         if (!createIfNoneExists) {
             return null;
-        }
-        else {
+        } else {
             return create(l);
         }
     }
 
-    private static boolean isPossibleHologram(@Nonnull ArmorStand armorstand) {
-        return armorstand.isValid() && armorstand.isSilent() && armorstand.isMarker() && !armorstand.hasGravity() && armorstand.isCustomNameVisible();
+    private static boolean isPossibleHologram(@Nonnull Entity n) {
+        if (n instanceof ArmorStand) {
+            ArmorStand armorstand = (ArmorStand) n;
+            return armorstand.isValid() && armorstand.isSilent() && armorstand.isMarker() && !armorstand.hasGravity() && armorstand.isCustomNameVisible();
+        } else {
+            return false;
+        }
+
     }
 
     @Nonnull

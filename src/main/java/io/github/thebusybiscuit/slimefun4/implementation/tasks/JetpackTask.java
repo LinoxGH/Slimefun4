@@ -2,7 +2,6 @@ package io.github.thebusybiscuit.slimefun4.implementation.tasks;
 
 import javax.annotation.Nonnull;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -11,7 +10,7 @@ import org.bukkit.util.Vector;
 
 import io.github.thebusybiscuit.slimefun4.implementation.items.electric.gadgets.Jetpack;
 
-public class JetpackTask extends PlayerTask {
+public class JetpackTask extends AbstractPlayerTask {
 
     private static final float COST = 0.08F;
 
@@ -20,11 +19,6 @@ public class JetpackTask extends PlayerTask {
     public JetpackTask(@Nonnull Player p, @Nonnull Jetpack jetpack) {
         super(p);
         this.jetpack = jetpack;
-    }
-
-    @Override
-    public void setID(int id) {
-        this.id = id;
     }
 
     @Override
@@ -42,9 +36,8 @@ public class JetpackTask extends PlayerTask {
             vector.add(p.getEyeLocation().getDirection().multiply(0.2F));
 
             p.setVelocity(vector);
-        }
-        else {
-            Bukkit.getScheduler().cancelTask(id);
+        } else {
+            cancel();
         }
     }
 }

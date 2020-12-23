@@ -38,17 +38,31 @@ public class Contributor {
     private final ComputedOptional<String> headTexture = ComputedOptional.createNew();
 
     private Optional<UUID> uuid = Optional.empty();
-    private boolean locked = false;
+    private boolean immutable = false;
 
-    public Contributor(@Nonnull String username, @Nonnull String profile) {
-        Validate.notNull(username, "Username must never be null!");
+    /**
+     * This creates a new {@link Contributor} with the given ingame name and GitHub profile.
+     * 
+     * @param minecraftName
+     *            The ingame name in Minecraft for this {@link Contributor}
+     * @param profile
+     *            A link to their GitHub profile
+     */
+    public Contributor(@Nonnull String minecraftName, @Nonnull String profile) {
+        Validate.notNull(minecraftName, "Username must never be null!");
         Validate.notNull(profile, "The profile cannot be null!");
 
         githubUsername = profile.substring(profile.lastIndexOf('/') + 1);
-        minecraftUsername = username;
+        minecraftUsername = minecraftName;
         profileLink = profile;
     }
 
+    /**
+     * This creates a new {@link Contributor} with the given username.
+     * 
+     * @param username
+     *            The username of this {@link Contributor}
+     */
     public Contributor(@Nonnull String username) {
         Validate.notNull(username, "Username must never be null!");
 
@@ -57,18 +71,28 @@ public class Contributor {
         profileLink = null;
     }
 
-    public void setContribution(@Nonnull String role, int commits) {
+    /**
+     * This sets the amount of contributions of this {@link Contributor} for the
+     * specified role.
+     * 
+     * @param role
+     *            The role of this {@link Contributor}
+     * @param commits
+     *            The amount of contributions made as that role
+     */
+    public void setContributions(@Nonnull String role, int commits) {
         Validate.notNull(role, "The role cannot be null!");
+        Validate.isTrue(commits >= 0, "Contributions cannot be negative");
 
-        if (!locked || role.startsWith("translator,")) {
+        if (!immutable || role.startsWith("translator,")) {
             contributions.put(role, commits);
         }
     }
 
     /**
-     * Returns the name of this contributor.
+     * Returns the name of this {@link Contributor}.
      *
-     * @return the name of this contributor
+     * @return the name of this {@link Contributor}
      */
     @Nonnull
     public String getName() {
@@ -76,10 +100,10 @@ public class Contributor {
     }
 
     /**
-     * Returns the MC name of the contributor.
-     * This may be the same as {@link #getName()}.
+     * Returns the Minecraft username of the {@link Contributor}.
+     * This can be the same as {@link #getName()}.
      *
-     * @return The MC username of this contributor.
+     * @return The Minecraft username of this {@link Contributor}.
      */
     @Nonnull
     public String getMinecraftName() {
@@ -96,6 +120,13 @@ public class Contributor {
         return profileLink;
     }
 
+    /**
+     * This returns a {@link List} of contributions for this {@link Contributor}.
+     * Each entry consists of a {@link String} (for the role) and an {@link Integer}
+     * (for the amount of commits).
+     * 
+     * @return A {@link List} of contributions for this {@link Contributor}
+     */
     @Nonnull
     public List<Map.Entry<String, Integer>> getContributions() {
         List<Map.Entry<String, Integer>> list = new ArrayList<>(contributions.entrySet());
@@ -109,9 +140,12 @@ public class Contributor {
      * 
      * @param role
      *            The role for which to count the contributions.
+     * 
      * @return The amount of contributions this {@link Contributor} submitted as the given role
      */
     public int getContributions(@Nonnull String role) {
+        Validate.notNull(role, "The role cannot be null!");
+
         return contributions.getOrDefault(role, 0);
     }
 
@@ -137,7 +171,7 @@ public class Contributor {
     }
 
     /**
-     * Returns this Creator's head texture.
+     * Returns this contributor's head texture.
      * If no texture could be found, or it hasn't been pulled yet,
      * then it will return a placeholder texture.
      * 
@@ -151,12 +185,10 @@ public class Contributor {
             if (github != null) {
                 String cached = github.getCachedTexture(githubUsername);
                 return cached != null ? cached : HeadTexture.UNKNOWN.getTexture();
-            }
-            else {
+            } else {
                 return HeadTexture.UNKNOWN.getTexture();
             }
-        }
-        else {
+        } else {
             return headTexture.get();
         }
     }
@@ -171,24 +203,55 @@ public class Contributor {
         return headTexture.isComputed();
     }
 
+    /**
+     * This sets the skin texture of this {@link Contributor} or clears it.
+     * 
+     * @param skin
+     *            The base64 skin texture or null
+     */
     public void setTexture(@Nullable String skin) {
         headTexture.compute(skin);
     }
 
+    /**
+     * This returns the total amount of contributions towards this project for this
+     * {@link Contributor}.
+     * 
+     * @return The total amount of contributions
+     */
     public int getTotalContributions() {
         return contributions.values().stream().mapToInt(Integer::intValue).sum();
     }
 
-    public int index() {
-        return -getTotalContributions();
-    }
-
+    /**
+     * This returns the final display name for this {@link Contributor}.
+     * The display name is basically the GitHub username but if the Minecraft username differs,
+     * it will be appended in brackets behind the GitHub username.
+     * 
+     * @return The final display name of this {@link Contributor}.
+     */
     @Nonnull
     public String getDisplayName() {
         return ChatColor.GRAY + githubUsername + (!githubUsername.equals(minecraftUsername) ? ChatColor.DARK_GRAY + " (MC: " + minecraftUsername + ")" : "");
     }
 
-    public void lock() {
-        locked = true;
+    /**
+     * This returns the position on where to order this {@link Contributor}.
+     * This is just a convenience method for a {@link Comparator}, it is equivalent to
+     * {@link #getTotalContributions()} multiplied by minus one.
+     * 
+     * @return The position of this {@link Contributor} in terms for positioning and ordering.
+     */
+    public int getPosition() {
+        return -getTotalContributions();
+    }
+
+    /**
+     * This marks this {@link Contributor} as immutable.
+     * Immutable {@link Contributor Contributors} will no longer be assigned any contributions.
+     * This is useful when you want to prevent some commits from counting twice.
+     */
+    public void setImmutable() {
+        immutable = true;
     }
 }

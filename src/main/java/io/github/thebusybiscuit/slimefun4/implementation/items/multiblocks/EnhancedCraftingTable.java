@@ -23,7 +23,7 @@ import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.SlimefunItem;
 import me.mrCookieSlime.Slimefun.api.Slimefun;
 import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
 
-public class EnhancedCraftingTable extends BackpackCrafter {
+public class EnhancedCraftingTable extends AbstractCraftingTable {
 
     public EnhancedCraftingTable(Category category, SlimefunItemStack item) {
         super(category, item, new ItemStack[] { null, null, null, null, new ItemStack(Material.CRAFTING_TABLE), null, null, new ItemStack(Material.DISPENSER), null }, BlockFace.SELF);
@@ -78,8 +78,7 @@ public class EnhancedCraftingTable extends BackpackCrafter {
 
             outputInv.addItem(output);
 
-        }
-        else {
+        } else {
             SlimefunPlugin.getLocalization().sendMessage(p, "machines.full-inventory", true);
         }
     }
@@ -91,8 +90,7 @@ public class EnhancedCraftingTable extends BackpackCrafter {
                     if (!SlimefunUtils.isItemSimilar(inv.getContents()[j], recipe[j], false)) {
                         return false;
                     }
-                }
-                else {
+                } else {
                     return false;
                 }
             }

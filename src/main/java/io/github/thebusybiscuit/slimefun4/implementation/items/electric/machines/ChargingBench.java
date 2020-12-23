@@ -33,16 +33,6 @@ public class ChargingBench extends AContainer {
     }
 
     @Override
-    public int getEnergyConsumption() {
-        return 10;
-    }
-
-    @Override
-    public int getCapacity() {
-        return 128;
-    }
-
-    @Override
     protected void tick(Block b) {
         if (getCharge(b.getLocation()) < getEnergyConsumption()) {
             return;
@@ -67,25 +57,18 @@ public class ChargingBench extends AContainer {
 
             if (((Rechargeable) sfItem).addItemCharge(item, charge)) {
                 removeCharge(b.getLocation(), getEnergyConsumption());
-            }
-            else if (inv.fits(item, getOutputSlots())) {
+            } else if (inv.fits(item, getOutputSlots())) {
                 inv.pushItem(item, getOutputSlots());
                 inv.replaceExistingItem(slot, null);
             }
 
             return true;
-        }
-        else if (sfItem != null && inv.fits(item, getOutputSlots())) {
+        } else if (sfItem != null && inv.fits(item, getOutputSlots())) {
             inv.pushItem(item, getOutputSlots());
             inv.replaceExistingItem(slot, null);
         }
 
         return false;
-    }
-
-    @Override
-    public int getSpeed() {
-        return 1;
     }
 
     @Override

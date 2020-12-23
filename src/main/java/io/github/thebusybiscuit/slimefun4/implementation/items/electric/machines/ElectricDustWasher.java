@@ -14,7 +14,7 @@ import me.mrCookieSlime.Slimefun.Objects.SlimefunItem.abstractItems.MachineRecip
 import me.mrCookieSlime.Slimefun.api.SlimefunItemStack;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 
-public abstract class ElectricDustWasher extends AContainer {
+public class ElectricDustWasher extends AContainer {
 
     private OreWasher oreWasher;
     private final boolean legacyMode;
@@ -52,8 +52,7 @@ public abstract class ElectricDustWasher extends AContainer {
                     menu.consumeItem(slot);
                     return recipe;
                 }
-            }
-            else if (SlimefunUtils.isItemSimilar(menu.getItemInSlot(slot), SlimefunItems.PULVERIZED_ORE, true)) {
+            } else if (SlimefunUtils.isItemSimilar(menu.getItemInSlot(slot), SlimefunItems.PULVERIZED_ORE, true)) {
                 MachineRecipe recipe = new MachineRecipe(4 / getSpeed(), new ItemStack[0], new ItemStack[] { SlimefunItems.PURE_ORE_CLUSTER });
 
                 if (menu.fits(recipe.getOutput()[0], getOutputSlots())) {

@@ -25,7 +25,7 @@ import me.mrCookieSlime.Slimefun.api.inventory.BlockMenu;
 import me.mrCookieSlime.Slimefun.api.inventory.BlockMenuPreset;
 import me.mrCookieSlime.Slimefun.api.item_transport.ItemTransportFlow;
 
-public abstract class OilPump extends AContainer implements RecipeDisplayItem {
+public class OilPump extends AContainer implements RecipeDisplayItem {
 
     private final GEOResource oil;
 
@@ -34,7 +34,7 @@ public abstract class OilPump extends AContainer implements RecipeDisplayItem {
 
         oil = SlimefunPlugin.getRegistry().getGEOResources().get(new NamespacedKey(SlimefunPlugin.instance(), "oil")).orElse(null);
 
-        new BlockMenuPreset(getID(), getInventoryTitle()) {
+        new BlockMenuPreset(getId(), getInventoryTitle()) {
 
             @Override
             public void init() {
@@ -43,7 +43,7 @@ public abstract class OilPump extends AContainer implements RecipeDisplayItem {
 
             @Override
             public boolean canOpen(Block b, Player p) {
-                if (!(p.hasPermission("slimefun.inventory.bypass") || SlimefunPlugin.getProtectionManager().hasPermission(p, b.getLocation(), ProtectableAction.ACCESS_INVENTORIES))) {
+                if (!(p.hasPermission("slimefun.inventory.bypass") || SlimefunPlugin.getProtectionManager().hasPermission(p, b.getLocation(), ProtectableAction.INTERACT_BLOCK))) {
                     return false;
                 }
 
@@ -59,8 +59,7 @@ public abstract class OilPump extends AContainer implements RecipeDisplayItem {
             public int[] getSlotsAccessedByItemTransport(ItemTransportFlow flow) {
                 if (flow == ItemTransportFlow.INSERT) {
                     return getInputSlots();
-                }
-                else {
+                } else {
                     return getOutputSlots();
                 }
             }
@@ -97,8 +96,7 @@ public abstract class OilPump extends AContainer implements RecipeDisplayItem {
                         inv.consumeItem(slot);
                         SlimefunPlugin.getGPSNetwork().getResourceManager().setSupplies(oil, b.getWorld(), b.getX() >> 4, b.getZ() >> 4, supplies.getAsInt() - 1);
                         return recipe;
-                    }
-                    else {
+                    } else {
                         // Move the empty bucket to the output slot to prevent this
                         // from immediately starting all over again (to prevent lag)
                         ItemStack item = inv.getItemInSlot(slot).clone();
